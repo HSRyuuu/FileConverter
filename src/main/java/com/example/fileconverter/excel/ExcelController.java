@@ -6,6 +6,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.xml.ws.Response;
 import java.io.IOException;
 
 @RequiredArgsConstructor
@@ -25,14 +26,22 @@ public class ExcelController {
                 .body(excelFile.getExcelBytes());
     }
 
-    @PostMapping("/api/convert/excel/test")
+    @PostMapping("/api/test/upload")
     public ResponseEntity<String> test(@RequestBody String json) throws IOException {
         ExcelData excelData = excelService.parseJson(json);
         ExcelResult excelFile = excelService.createExcelFile(excelData);
         HttpHeaders headers = excelService.getExcelHeader(excelFile.getFileName());
-        // xxx
+        String fileName = excelService.saveFile(excelFile);
         return ResponseEntity.ok()
-                .body(excelFile.getFileName());
+                .body(fileName);
+    }
+
+    @GetMapping("/api/test/download")
+    public ResponseEntity<byte[]> saveExcelFile(@RequestParam(name = "nm")String fileName) {
+        ExcelResult excelResult = excelService.getFileByFileName(fileName);
+        return ResponseEntity.ok()
+                .headers(excelService.getExcelHeader(fileName))
+                .body(excelResult.getExcelBytes());
     }
 
 }
