@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+@Slf4j
 @Service
 public class ExcelService {
 
@@ -124,9 +126,9 @@ public class ExcelService {
 
 
     public void printParsingResult(ExcelData excelData){
-        System.out.println(excelData.getHeaders());
+        log.info("> header : {}", excelData.getHeaders());
         for(List<String> data : excelData.getDataSet()){
-            System.out.println(data);
+            log.info("> data : {}", data);
         }
     }
 
