@@ -1,4 +1,4 @@
-package com.example.fileconverter;
+package com.example.fileconverter.excel;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
