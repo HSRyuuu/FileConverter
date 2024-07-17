@@ -1,6 +1,7 @@
 package com.example.fileconverter.excel;
 
 
+import com.example.fileconverter.common.IrisDataObject;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -27,13 +28,14 @@ public class ExcelController {
     }
 
     @PostMapping("/api/test/upload")
-    public ResponseEntity<Data> test(@RequestBody String json) throws IOException {
+    public ResponseEntity<IrisDataObject> test(@RequestBody String json) throws IOException {
         ExcelData excelData = excelService.parseJson(json);
         ExcelResult excelFile = excelService.createExcelFile(excelData);
-        HttpHeaders headers = excelService.getExcelHeader(excelFile.getFileName());
+        HttpHeaders headers = excelService.getJsonHeader(excelFile.getFileName());
         String fileName = excelService.saveFile(excelFile);
         return ResponseEntity.ok()
-                .body(new Data(fileName));
+                .headers(headers)
+                .body(new IrisDataObject("fileName", fileName));
     }
 
     @GetMapping("/api/test/download")
@@ -44,9 +46,6 @@ public class ExcelController {
                 .body(excelResult.getExcelBytes());
     }
 
-    @AllArgsConstructor
-    static class Data{
-        private String name;
-    }
+
 
 }

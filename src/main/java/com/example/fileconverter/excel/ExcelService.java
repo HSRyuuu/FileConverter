@@ -33,8 +33,9 @@ public class ExcelService {
     public ExcelResult createExcelFile(ExcelData excelData) throws IOException {
         List<String> headers = excelData.getHeaders();
         List<List<String>> dataSet = excelData.getDataSet();
-        String time = LocalDateTime.now().toString().replace(":","-").replace(".","-");
-        String fileName = time + "-" + excelData.getJobId() + ".xlsx";
+        LocalDateTime now = LocalDateTime.now();
+        String time = String.format("%d%02d%d%d", now.getYear() ,now.getMonthValue() , now.getDayOfMonth(), now.getHour());
+        String fileName = time + "-" + excelData.getJobId().substring(0, 4) + ".xlsx";
 
         //Excel Sheet 생성
         Workbook workbook = new XSSFWorkbook();
@@ -126,6 +127,12 @@ public class ExcelService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         headers.setContentDispositionFormData("attachment", fileName);
+        return headers;
+    }
+
+    public HttpHeaders getJsonHeader(String fileName){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
     }
 
