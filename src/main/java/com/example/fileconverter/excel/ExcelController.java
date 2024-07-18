@@ -1,10 +1,10 @@
 package com.example.fileconverter.excel;
 
 
-import com.example.fileconverter.common.IrisDataObject;
-import lombok.AllArgsConstructor;
+import com.example.fileconverter.common.iris.IrisDataObject;
+import com.example.fileconverter.excel.dto.ExcelConvertResult;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,34 +16,28 @@ public class ExcelController {
 
     private final ExcelService excelService;
 
+    @ApiOperation(value = "IRIS에서 제공하는 data json 형식을 받아서 .xlsx 파일로 변환",
+            notes = "key를 받아서 downloadExcelFile을 통해 다운로드 가능")
     @PostMapping("/api/convert/excel")
-    public ResponseEntity<byte[]> convertJsonToXlsx(@RequestBody String json) throws IOException {
-        ExcelData excelData = excelService.parseJson(json);
-        ExcelResult excelFile = excelService.createExcelFile(excelData);
-        HttpHeaders headers = excelService.getExcelHeader(excelFile.getFileName());
-        // 추가 파일 저장 로직 등
+    public ResponseEntity<IrisDataObject> convertIrisJsonToXlsx(@RequestBody String json) throws IOException {
+        IrisDataObject irisDataObject = IrisDataObject.fromIrisDataJson(json);
+        //convert json to excel
+        ExcelConvertResult excelConvertResult = excelService.createExcelFile(irisDataObject);
+        //excel file을 찾을 수 있는 key
+        String key = excelService.saveFile(excelConvertResult);
+
         return ResponseEntity.ok()
-                .headers(headers)
-                .body(excelFile.getExcelBytes());
+                .headers(excelService.getJsonHeader())
+                .body(new IrisDataObject("key", key));
     }
 
-    @PostMapping("/api/test/upload")
-    public ResponseEntity<IrisDataObject> test(@RequestBody String json) throws IOException {
-        ExcelData excelData = excelService.parseJson(json);
-        ExcelResult excelFile = excelService.createExcelFile(excelData);
-        HttpHeaders headers = excelService.getJsonHeader(excelFile.getFileName());
-        String fileName = excelService.saveFile(excelFile);
+    @ApiOperation(value = "key를 통해 excel file을 찾아서 반환", notes = "{key}.xlsx가 파일 명")
+    @GetMapping("/api/download/excel")
+    public ResponseEntity<byte[]> downloadExcelFile(@RequestParam(name = "key")String key) {
+        ExcelConvertResult excelConvertResult = excelService.getFileByKey(key);
         return ResponseEntity.ok()
-                .headers(headers)
-                .body(new IrisDataObject("fileName", fileName));
-    }
-
-    @GetMapping("/api/test/download")
-    public ResponseEntity<byte[]> saveExcelFile(@RequestParam(name = "nm")String fileName) {
-        ExcelResult excelResult = excelService.getFileByFileName(fileName);
-        return ResponseEntity.ok()
-                .headers(excelService.getExcelHeader(fileName))
-                .body(excelResult.getExcelBytes());
+                .headers(excelService.getExcelHeader(excelConvertResult.getFileName()))
+                .body(excelConvertResult.getExcelFile());
     }
 
 
