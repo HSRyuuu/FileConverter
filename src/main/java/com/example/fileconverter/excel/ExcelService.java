@@ -29,6 +29,9 @@ import java.util.stream.Collectors;
 @Service
 public class ExcelService {
 
+    final String FILE_PATH = "/data/www/portal/htdocs/upload/";
+    final String LOCAL_FILE_PATH = "C:\\dev_files\\";
+
     /**
      * IrisDataObject를 excel 파일로 변환
      *
@@ -122,6 +125,7 @@ public class ExcelService {
 
             // 파일 경로 설정
             String filePath = directoryPath + "/" + fileName;
+            filePath =  FILE_PATH + fileName;
 
             // 파일 저장
             try (FileOutputStream fos = new FileOutputStream(filePath)) {
@@ -145,7 +149,7 @@ public class ExcelService {
         String fileName = key + ".xlsx";
         try {
             // 상대 경로 설정
-            Path filePath = Paths.get("files").toAbsolutePath().normalize().resolve(fileName);
+            Path filePath = Paths.get(FILE_PATH + fileName).toAbsolutePath().normalize();
 
             File file = filePath.toFile();
             if (!file.exists()) {

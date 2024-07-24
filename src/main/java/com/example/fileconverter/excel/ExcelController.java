@@ -20,6 +20,7 @@ public class ExcelController {
             notes = "key를 받아서 downloadExcelFile을 통해 다운로드 가능")
     @PostMapping("/api/convert/excel")
     public ResponseEntity<IrisDataObject> convertIrisJsonToXlsx(@RequestBody String json) throws IOException {
+        //Json 형식 그대로 파싱하여 객체로 변환
         IrisDataObject irisDataObject = IrisDataObject.fromIrisDataJson(json);
         //convert json to excel
         ExcelConvertResult excelConvertResult = excelService.createExcelFile(irisDataObject);
@@ -35,6 +36,7 @@ public class ExcelController {
     @GetMapping("/api/download/excel")
     public ResponseEntity<byte[]> downloadExcelFile(@RequestParam(name = "key")String key) {
         ExcelConvertResult excelConvertResult = excelService.getFileByKey(key);
+
         return ResponseEntity.ok()
                 .headers(excelService.getExcelHeader(excelConvertResult.getFileName()))
                 .body(excelConvertResult.getExcelFile());
