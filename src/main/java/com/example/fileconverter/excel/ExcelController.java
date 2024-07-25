@@ -6,11 +6,10 @@ import com.example.fileconverter.common.util.HttpHeaderUtil;
 import com.example.fileconverter.excel.dto.ExcelConvertResult;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Slf4j
+
 @RequiredArgsConstructor
 @RestController
 public class ExcelController {
@@ -23,7 +22,6 @@ public class ExcelController {
     public ResponseEntity<IrisDataObject> convertIrisJsonToXlsx(@RequestBody String irisDataJson,
                                                                 @RequestParam(value = "name") String reportName,
                                                                 @RequestParam(value = "date") String referenceDate){
-        log.info("[Request] POST /api/convert/excel?name={}&date={} convertIrisJsonToXlsx", reportName, referenceDate);
         String fileName = excelService.createFileName(reportName, referenceDate);
         IrisDataObject irisDataObject = IrisDataObject.fromIrisDataJson(irisDataJson);//Json 형식 그대로 파싱하여 객체로 변환
         String key = excelService.createExcelFile(irisDataObject, fileName);
@@ -36,7 +34,6 @@ public class ExcelController {
     @ApiOperation(value = "key를 통해 excel file을 찾아서 반환", notes = "{key}.xlsx가 파일 명")
     @GetMapping("/api/download/excel")
     public ResponseEntity<byte[]> downloadExcelFile(@RequestParam(name = "key")String key) {
-        log.info("[Request] GET /api/download/excel?key={}", key);
         ExcelConvertResult excelConvertResult = excelService.getFileByKey(key);
 
         return ResponseEntity.ok()
