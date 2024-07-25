@@ -1,6 +1,7 @@
 package com.example.fileconverter.web;
 
 import com.example.fileconverter.common.iris.IrisDataObject;
+import com.example.fileconverter.common.util.HttpHeaderUtil;
 import com.example.fileconverter.excel.dto.ExcelConvertResult;
 import com.example.fileconverter.excel.ExcelService;
 import lombok.RequiredArgsConstructor;
@@ -25,17 +26,17 @@ public class TestWebPageController {
         return "excel";
     }
 
-   @PostMapping("/convert/excel")
-    public ResponseEntity<byte[]> test(@RequestParam String inputData) throws IOException {
-        IrisDataObject irisDataObject = IrisDataObject.fromIrisDataJson(inputData);
-
-       ExcelConvertResult excelConvertResult = excelService.createExcelFile(irisDataObject);
-       HttpHeaders headers = excelService.getExcelHeader(excelConvertResult.getFileName());
-       byte[] excelBytes = excelConvertResult.getExcelFile();
-
-       return ResponseEntity.ok()
-                .headers(headers)
-                .body(excelBytes);
-    }
+//   @PostMapping("/convert/excel")
+//    public ResponseEntity<byte[]> test(@RequestParam String inputData) throws IOException {
+//        IrisDataObject irisDataObject = IrisDataObject.fromIrisDataJson(inputData);
+//
+//       ExcelConvertResult excelConvertResult = excelService.createExcelFile(irisDataObject, "file");
+//       HttpHeaders headers = HttpHeaderUtil.getExcelHeader(excelConvertResult.getFileName());
+//       byte[] excelBytes = excelConvertResult.getExcelFile();
+//
+//       return ResponseEntity.ok()
+//                .headers(headers)
+//                .body(excelBytes);
+//    }
 
 }

@@ -2,13 +2,13 @@ package com.example.fileconverter.excel;
 
 
 import com.example.fileconverter.common.iris.IrisDataObject;
+import com.example.fileconverter.common.util.HttpHeaderUtil;
 import com.example.fileconverter.excel.dto.ExcelConvertResult;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 
 @RequiredArgsConstructor
 @RestController
@@ -19,16 +19,15 @@ public class ExcelController {
     @ApiOperation(value = "IRIS에서 제공하는 data json 형식을 받아서 .xlsx 파일로 변환",
             notes = "key를 받아서 downloadExcelFile을 통해 다운로드 가능")
     @PostMapping("/api/convert/excel")
-    public ResponseEntity<IrisDataObject> convertIrisJsonToXlsx(@RequestBody String json) throws IOException {
-        //Json 형식 그대로 파싱하여 객체로 변환
-        IrisDataObject irisDataObject = IrisDataObject.fromIrisDataJson(json);
-        //convert json to excel
-        ExcelConvertResult excelConvertResult = excelService.createExcelFile(irisDataObject);
-        //excel file을 찾을 수 있는 key
-        String key = excelService.saveFile(excelConvertResult);
+    public ResponseEntity<IrisDataObject> convertIrisJsonToXlsx(@RequestBody String irisDataJson,
+                                                                @RequestParam(value = "name") String reportName,
+                                                                @RequestParam(value = "date") String referenceDate){
+        String fileName = excelService.createFileName(reportName, referenceDate);
+        IrisDataObject irisDataObject = IrisDataObject.fromIrisDataJson(irisDataJson);//Json 형식 그대로 파싱하여 객체로 변환
+        String key = excelService.createExcelFile(irisDataObject, fileName);
 
         return ResponseEntity.ok()
-                .headers(excelService.getJsonHeader())
+                .headers(HttpHeaderUtil.getJsonHeader())
                 .body(new IrisDataObject("key", key));
     }
 
@@ -38,7 +37,7 @@ public class ExcelController {
         ExcelConvertResult excelConvertResult = excelService.getFileByKey(key);
 
         return ResponseEntity.ok()
-                .headers(excelService.getExcelHeader(excelConvertResult.getFileName()))
+                .headers(HttpHeaderUtil.getExcelHeader(excelConvertResult.getFileName()))
                 .body(excelConvertResult.getExcelFile());
     }
 
