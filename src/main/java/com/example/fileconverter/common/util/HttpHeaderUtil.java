@@ -5,14 +5,13 @@ import org.springframework.http.MediaType;
 import org.springframework.web.util.UriUtils;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 
 public class HttpHeaderUtil {
     /**
      * ExcelFile 전송을 위한 HTTP Header
      *
      * @param fileName
-     * @return
+     * @return ExcelFile 전송 시 HTTP Headers
      */
     public static HttpHeaders getExcelHeader(String fileName) {
         HttpHeaders headers = new HttpHeaders();
@@ -25,7 +24,7 @@ public class HttpHeaderUtil {
     /**
      * Json 전송을 위한 HTTP Header
      *
-     * @return
+     * @return Json 전송 시 HTTP Headers
      */
     public static HttpHeaders getJsonHeader() {
         HttpHeaders headers = new HttpHeaders();

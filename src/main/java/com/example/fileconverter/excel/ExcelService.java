@@ -1,6 +1,5 @@
 package com.example.fileconverter.excel;
 
-import com.example.fileconverter.common.type.ConvertResult;
 import com.example.fileconverter.common.iris.IrisDataObject;
 import com.example.fileconverter.common.iris.IrisFieldObject;
 import com.example.fileconverter.excel.dto.ExcelConvertResult;
@@ -43,7 +42,7 @@ public class ExcelService {
         Pattern pattern = Pattern.compile(DATE_PATTERN);
         if (!pattern.matcher(referenceDate).matches()) {
             log.error("Pattern Error: reference_date wrong pattern => yyyy-mm-dd required");
-            throw new IllegalArgumentException("[Pattern Error] reference_date wrong pattern => yyyy-mm-dd required");
+            throw new IllegalArgumentException("Pattern Error: reference_date wrong pattern => yyyy-mm-dd required");
         }
         return new StringBuilder(reportName).append("_")
                 .append(referenceDate.substring(0, 4)).append("년")
@@ -159,30 +158,31 @@ public class ExcelService {
      * @return
      */
     public ExcelConvertResult getFileByKey(String key) {
-        String fileName = getKey(key) + ".xlsx";
+        String fileName = getKeyFromRandomizedKey(key) + ".xlsx";
         try {
             // 상대 경로 설정
             Path filePath = Paths.get(FILE_PATH + "/" + fileName).toAbsolutePath().normalize();
 
             File file = filePath.toFile();
             if (!file.exists()) {
-                return new ExcelConvertResult(ConvertResult.ERROR);
+                log.error("Excel File NOT FOUND: key={}", key);
+                throw new RuntimeException("File NOT FOUND: key={}");
             }
 
             byte[] excelFile = Files.readAllBytes(filePath);
             log.info("Find ExcelFile Complete: path ={}/{} ", FILE_PATH, fileName);
             return new ExcelConvertResult(key, fileName, excelFile);
         } catch (IOException e) {
-            log.error("Excel File NOT FOUND: key={})", key);
-            return new ExcelConvertResult(ConvertResult.ERROR);
+            log.error("IOException", e);
         }
+        throw new RuntimeException("File NOT FOUND: key={}");
     }
 
     private String getRandomizedKey(String key) {
         return UUID.randomUUID().toString().substring(0, 4) + key;
     }
 
-    private String getKey(String randomizedKey){
+    private String getKeyFromRandomizedKey(String randomizedKey){
         return randomizedKey.substring(4);
     }
 
