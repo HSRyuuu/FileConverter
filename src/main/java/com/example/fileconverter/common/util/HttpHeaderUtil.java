@@ -17,7 +17,6 @@ public class HttpHeaderUtil {
     public static HttpHeaders getExcelHeader(String fileName) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        headers.setAcceptCharset(Collections.singletonList(StandardCharsets.UTF_8));
         String encodedFileName = UriUtils.encode(fileName, StandardCharsets.UTF_8);
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + encodedFileName + "\"; filename*=UTF-8''" + encodedFileName);
         return headers;

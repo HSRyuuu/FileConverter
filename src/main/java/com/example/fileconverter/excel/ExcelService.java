@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -41,7 +42,7 @@ public class ExcelService {
         final String DATE_PATTERN = "^\\d{4}-\\d{2}-\\d{2}$";
         Pattern pattern = Pattern.compile(DATE_PATTERN);
         if (!pattern.matcher(referenceDate).matches()) {
-            log.error("[Pattern Error] reference_date wrong pattern => yyyy-mm-dd required");
+            log.error("Pattern Error: reference_date wrong pattern => yyyy-mm-dd required");
             throw new IllegalArgumentException("[Pattern Error] reference_date wrong pattern => yyyy-mm-dd required");
         }
         return new StringBuilder(reportName).append("_")
@@ -59,10 +60,11 @@ public class ExcelService {
     public String createExcelFile(IrisDataObject irisData, String key) {
         String fileName = key + ".xlsx";
         if(this.fileExists(fileName)){
-            log.info("[File Already Exists] fileName={}, path={} => just return key", fileName, FILE_PATH);
-            return key;
+            log.info("File Already Exists: fileName={}, path={} => just return key", fileName, FILE_PATH);
+
+            return this.getRandomizedKey(key);
         }
-        log.info("[File Not Exists] create file start");
+        log.info("File Not Exists: create file start");
 
         List<String> headers =
                 irisData.getFields().stream()
@@ -74,7 +76,7 @@ public class ExcelService {
 
         this.saveFile(fileName, excelBytes);
 
-        return key;
+        return this.getRandomizedKey(key);
     }
 
     /**
@@ -122,10 +124,10 @@ public class ExcelService {
             workbook.close();
             outputStream.close();
         } catch (IOException e) {
-            log.error("[ByteArrayOutputStream Error] writing excel file", e);
+            log.error("ByteArrayOutputStream Error: writing excel file", e);
         }
 
-        log.info("[Excel File Created] fileName={} ", fileName);
+        log.info("Excel File Created: fileName={} ", fileName);
         return outputStream.toByteArray();
     }
 
@@ -143,9 +145,9 @@ public class ExcelService {
             FileOutputStream fos = new FileOutputStream(filePath);
             fos.write(excelFile);
             fos.close();
-            log.info("[Save File Complete] path={}", filePath);
+            log.info("Save File Complete: path={}", filePath);
         } catch (IOException e) {
-            log.error("[File Write Error] write excel file on FileOutputStream", e);
+            log.error("File Write Error: write excel file on FileOutputStream", e);
         }
 
     }
@@ -157,7 +159,7 @@ public class ExcelService {
      * @return
      */
     public ExcelConvertResult getFileByKey(String key) {
-        String fileName = key + ".xlsx";
+        String fileName = getKey(key) + ".xlsx";
         try {
             // 상대 경로 설정
             Path filePath = Paths.get(FILE_PATH + "/" + fileName).toAbsolutePath().normalize();
@@ -168,12 +170,20 @@ public class ExcelService {
             }
 
             byte[] excelFile = Files.readAllBytes(filePath);
-            log.info("[Find ExcelFile Complete] path ={}/{} ", FILE_PATH, fileName);
+            log.info("Find ExcelFile Complete: path ={}/{} ", FILE_PATH, fileName);
             return new ExcelConvertResult(key, fileName, excelFile);
         } catch (IOException e) {
-            log.error("[Excel.xlsx File NOT FOUND] key={})", key);
+            log.error("Excel File NOT FOUND: key={})", key);
             return new ExcelConvertResult(ConvertResult.ERROR);
         }
+    }
+
+    private String getRandomizedKey(String key) {
+        return UUID.randomUUID().toString().substring(0, 4) + key;
+    }
+
+    private String getKey(String randomizedKey){
+        return randomizedKey.substring(4);
     }
 
     /**
