@@ -53,15 +53,14 @@ public class ExcelService {
     /**
      * 엑셀 파일 생성, 저장 후 식별할 수 있는 key를 반환
      * @param irisData
-     * @param key
+     * @param fileName
      * @return key
      */
-    public String createExcelFile(IrisDataObject irisData, String key) {
-        String fileName = key + ".xlsx";
-        if(this.fileExists(fileName)){
-            log.info("File Already Exists: fileName={}, path={} => just return key", fileName, FILE_PATH);
-
-            return this.getRandomizedKey(key);
+    public String createExcelFile(IrisDataObject irisData, String fileName) {
+        String xlsxFileName = fileName + ".xlsx";
+        if(this.fileExists(xlsxFileName)){
+            log.info("File Already Exists: fileName={}, path={} => just return key", xlsxFileName, FILE_PATH);
+            return this.getRandomKey(fileName);
         }
         log.info("File Not Exists: create file start");
 
@@ -71,11 +70,11 @@ public class ExcelService {
                         .collect(Collectors.toList()); //헤더(컬럼)
         List<List<String>> rows = irisData.getResults(); //데이터
 
-        byte[] excelBytes = this.createExcelBytes(fileName, headers, rows);
+        byte[] excelBytes = this.createExcelBytes(xlsxFileName, headers, rows);
 
-        this.saveFile(fileName, excelBytes);
+        this.saveFile(xlsxFileName, excelBytes);
 
-        return this.getRandomizedKey(key);
+        return this.getRandomKey(fileName);
     }
 
     /**
@@ -158,7 +157,7 @@ public class ExcelService {
      * @return
      */
     public ExcelConvertResult getFileByKey(String key) {
-        String fileName = getKeyFromRandomizedKey(key) + ".xlsx";
+        String fileName = key.substring(4) + ".xlsx"; //XXXX_{파일명}.xlsx -> {파일명}.xlsx 변환
         try {
             // 상대 경로 설정
             Path filePath = Paths.get(FILE_PATH + "/" + fileName).toAbsolutePath().normalize();
@@ -178,26 +177,8 @@ public class ExcelService {
         throw new RuntimeException("File NOT FOUND: key={}");
     }
 
-    private String getRandomizedKey(String key) {
-        return UUID.randomUUID().toString().substring(0, 4) + key;
-    }
-
-    private String getKeyFromRandomizedKey(String randomizedKey){
-        return randomizedKey.substring(4);
-    }
-
-    /**
-     * 상대 경로 반환 (상대경로 사용 시)
-     * @param fileName
-     * @return
-     * @throws IOException
-     */
-    private String getRelativePath(String fileName) throws IOException {
-        String rootDirectory = "files";
-        // 상대 경로 설정
-        Path directoryPath = Paths.get(rootDirectory).toAbsolutePath().normalize();
-        Files.createDirectories(directoryPath);
-        return directoryPath +  "/" + fileName;
+    private String getRandomKey(String fileName) {
+        return UUID.randomUUID().toString().substring(0, 4) + fileName;
     }
 
 }

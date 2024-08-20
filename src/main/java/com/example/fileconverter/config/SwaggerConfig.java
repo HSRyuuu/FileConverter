@@ -27,7 +27,7 @@ public class SwaggerConfig {
     private ApiInfo apiInfo(){
         return new ApiInfoBuilder()
                 .title("FileConverter")
-                .description("파일 컨버터서비스")
+                .description("엑셀 파일 컨버팅")
                 .version("0.0.1")
                 .build();
     }
